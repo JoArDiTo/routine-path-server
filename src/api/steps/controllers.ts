@@ -41,7 +41,7 @@ export class StepController {
       const { id } = req.params;
       const { title, is_completed } = req.body;
 
-      if (!id || !title || is_completed === undefined) {
+      if (!id && (!title || is_completed === undefined)) {
         res.status(400).json({ error: 'Missing required fields' });
       }
 
@@ -61,6 +61,22 @@ export class StepController {
 
       const message = await this.stepService.deleteStep(id)
       res.status(200).json({ message });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      res.status(500).json({ error: errorMessage });
+    }
+  }
+
+  async changeStateSteps(req: Request, res: Response) {
+    try {
+      const { goal_id } = req.params
+      const { steps } = req.body
+
+      if (!goal_id) res.status(400).json({ error: 'Missing required fields' });
+
+      const message = await this.stepService.checkStepsStatus(goal_id, steps)
+      res.status(200).json({ message });
+ 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       res.status(500).json({ error: errorMessage });

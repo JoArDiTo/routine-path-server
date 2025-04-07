@@ -1,5 +1,4 @@
 -- This SQL file is used to create the database and tables for the application.
-
 CREATE DATABASE IF NOT EXISTS "routinepathdb";
 
 CREATE TABLE "users" (

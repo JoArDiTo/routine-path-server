@@ -29,7 +29,7 @@ export class StepService {
     const goal = await this.stepDatabase.getGoalById(goalId);
     if (!goal) throw new Error('Goal with this id does not exist');
 
-    const { id, title, description, deadline, status, created_at } = goal;
+    const { id, title, description, deadline, status, created_at, updated_at } = goal;
 
     const steps = await this.stepDatabase.getStepsByGoalId(goalId);
     const GoalWithSteps: GoalWithSteps = {
@@ -39,6 +39,7 @@ export class StepService {
       deadline,
       status,
       created_at,
+      updated_at,
       steps
     }
 
@@ -48,18 +49,17 @@ export class StepService {
   public async updateStepData(updateStepRequest: UpdateStepRequest) {
     const { id, title, is_completed } = updateStepRequest;
     if (typeof id !== 'string' || id.length < 1) throw new Error('Invalid id');
-    if (typeof title !== 'string' || title.length < 1) throw new Error('Invalid title');
-    if (typeof is_completed !== 'boolean') throw new Error('Invalid is_completed');
+    if (title && ( typeof title !== 'string' || title.length < 1)) throw new Error('Invalid title');
+    if (is_completed !== undefined && typeof is_completed !== 'boolean') throw new Error('Invalid is_completed');
 
     const step:Step = await this.stepDatabase.getStepById(id);
     if (!step) throw new Error('Step with this id does not exist');
 
-    const { goal_id } = await this.stepDatabase.getGoalIdByStepId(step.id);
+    if (title && step.title !== title) await this.stepDatabase.updateStep(id, 'title', title);
 
-    if (step.title !== title) await this.stepDatabase.updateStep(id, 'title', title);
-    if (step.is_completed !== is_completed) {
+    if (is_completed !== undefined && step.is_completed !== is_completed) {
       await this.stepDatabase.updateStep(id, 'is_completed', is_completed);
-      await this.checkGoalStatus(goal_id);
+      await this.checkGoalStatus(step.goal_id);
     }
 
     return updateStepRequest;
@@ -72,6 +72,33 @@ export class StepService {
     await this.stepDatabase.deleteStepById(step.id);
 
     return 'Step deleted successfully';
+  }
+
+  public async checkStepsStatus(goalId: string, stepStatusUpdateRequest: StepStatusUpdateRequest[]) {
+    const goal = await this.stepDatabase.getGoalById(goalId)
+    if (!goal) throw new Error('Goal with this id does not exist');
+    
+    const isStepsIdCorrect = await this.validateStepIds(goalId , stepStatusUpdateRequest)
+    if (!isStepsIdCorrect) throw new Error('Any Step not found')
+    
+      for (const step of stepStatusUpdateRequest) {
+        await this.stepDatabase.updateStep(step.id, 'is_completed', step.is_completed);
+      }
+
+    await this.checkGoalStatus(goalId);
+
+    return 'Steps udpated succesfully';
+  }
+
+  private async validateStepIds(goalId: string, stepStatusUpdateRequest: StepStatusUpdateRequest[]) {
+    const stepIds = stepStatusUpdateRequest.map(request => request.id);
+    const steps = await this.stepDatabase.getStepsByGoalId(goalId);
+
+    const allStepsBelongToGoal = stepIds.every(stepId => 
+      steps.some(step => step.id === stepId)
+    );
+
+    return allStepsBelongToGoal;
   }
 
   private async checkGoalStatus(goalId: string) {

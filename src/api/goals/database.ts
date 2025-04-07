@@ -25,4 +25,9 @@ export class GoalDatabase {
   async deleteGoalById(goalId: string) {
     await db.none('DELETE FROM "goals" WHERE id = $1;', [goalId]);
   }
+
+  async createStep(stepId: string, goalId: string, stepTitle: string, isCompleted: boolean, createdAt: Date) {
+    await db.none('INSERT INTO "steps" (id, goal_id, title, is_completed, created_at) VALUES ($1, $2, $3, $4, $5);', 
+      [stepId, goalId, stepTitle, isCompleted, createdAt]);
+  }
 }

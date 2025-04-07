@@ -14,6 +14,7 @@ export interface GoalWithSteps {
   deadline: Date;
   status: string;
   created_at: Date;
+  updated_at: null | Date;
   steps: Omit<Step, 'goal_id'>[];
 }
 
@@ -23,4 +24,4 @@ export interface StepStatusUpdateRequest {
 }
 
 export type RegisterStepRequest = Omit<Step, 'id' | 'is_completed' | 'created_at'>;
-export type UpdateStepRequest = Omit<Step, 'goal_id' | 'created_at'>;
+export type UpdateStepRequest = Partial<Omit<Step, 'goal_id' | 'created_at'>>;
