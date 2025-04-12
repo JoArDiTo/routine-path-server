@@ -11,7 +11,7 @@ export class GoalDatabase {
   }
 
   async getGoalsByUserId(userId: string) {
-    return await db.manyOrNone('SELECT id, title, deadline, status, created_at FROM "goals" WHERE user_id = $1;', [userId]);
+    return await db.manyOrNone('SELECT id, title, deadline, status, created_at FROM "goals" WHERE user_id = $1 ORDER BY created_at ASC', [userId]);
   }
 
   async getGoalById(id: string) {

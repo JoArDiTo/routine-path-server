@@ -37,12 +37,13 @@ export class GoalService {
   }
 
   public async updateGoalData(updateGoalRequest: UpdateGoalRequest) {
-    const { id, title, description, deadline } = updateGoalRequest;
+    const { id, title, description, deadline, status } = updateGoalRequest;
     
     if (typeof id !== 'string' || id.length < 1) throw new Error('Invalid id');
     if (title && (typeof title !== 'string' || title.length < 1)) throw new Error('Invalid title');
     if (description && (typeof description !== 'string' || description.length < 1)) throw new Error('Invalid description');
     if (deadline && (typeof deadline !== 'string' || isNaN(Date.parse(deadline)))) throw new Error('Invalid deadline');
+    if (status && (typeof status !== 'string')) throw new Error('Invalid status')
 
     const goal:Goal = await this.goalDatabase.getGoalById(id);
     if (!goal) throw new Error('Goal not found');
@@ -50,10 +51,11 @@ export class GoalService {
     if (title && goal.title !== title) await this.goalDatabase.updateGoal(id, 'title', title);
     if (description && goal.description !== description) await this.goalDatabase.updateGoal(id, 'description', description);
     if (deadline && goal.deadline !== deadline) await this.goalDatabase.updateGoal(id, 'deadline', deadline);
+    if (status && goal.deadline !== deadline) await this.goalDatabase.updateGoal(id, 'status', status)
 
     await this.goalDatabase.updateGoal(id, 'updated_at', new Date());
 
-    return { id, title, description, deadline };
+    return { id, title, description, deadline, status };
 
   }
 

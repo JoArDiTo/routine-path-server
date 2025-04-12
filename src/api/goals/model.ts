@@ -20,4 +20,4 @@ export type RegisterGoalRequest = Pick<Goal, 'title' | 'description' | 'deadline
 
 export type GoalResponse = Omit<Goal, 'user_id' | 'description' | 'updated_at'>;
 
-export type UpdateGoalRequest = Partial<Omit<Goal, 'user_id' | 'status' | 'created_at' | 'updated_at'>>
+export type UpdateGoalRequest = Partial<Omit<Goal, 'user_id' | 'created_at' | 'updated_at'>>
